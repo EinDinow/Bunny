@@ -8,7 +8,8 @@ const yeetGifs = [
     "https://i.imgur.com/I750YEo.gif",
     "https://i.imgur.com/TUqsydv.gif",
     "https://i.imgur.com/Fde5pWE.gif",
-    "https://i.imgur.com/qOn4GJs.gif"
+    "https://i.imgur.com/qOn4GJs.gif",
+    "https://imgur.com/a/orSXGO8"
 ];
 
 const yeetEmoji = "<a:yeet:1342524033547239495>";
