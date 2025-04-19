@@ -7,7 +7,8 @@ const sparkleGifs = [
 "https://i.imgur.com/ug2QFit.gif",
 "https://i.imgur.com/PNzq8VA.gif",
 "https://i.imgur.com/5X65m2M.gif",
-"https://i.imgur.com/e8yBPFd.gif"
+"https://i.imgur.com/e8yBPFd.gif",
+"https://i.imgur.com/ReaQBZJ.gif"
 ];
 
 const sparkleEmoji = "<a:sparkle:1342918035211812894>";

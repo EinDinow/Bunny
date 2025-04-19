@@ -7,7 +7,8 @@ const slapGifs = [
     "https://i.imgur.com/DzH9n70.gif",
     "https://i.imgur.com/qqLtEVl.gif",
     "https://i.imgur.com/xm6mMYx.gif",
-    "https://i.imgur.com/pJRmjmR.gif"
+    "https://i.imgur.com/pJRmjmR.gif",
+    "https://i.imgur.com/SUPE4vm.gif"
 ];
 
 const slapEmoji = "<:slap:1339326910962073612>";
