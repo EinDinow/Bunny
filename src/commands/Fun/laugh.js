@@ -1,8 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder } = require('discord.js');  // Verwende EmbedBuilder anstelle von MessageEmbed
+const { EmbedBuilder } = require('discord.js');
 const random = require('random');
 
-// Diese GIFs sind als Beispiel, stelle sicher, dass du die richtigen URLs für deine GIFs hast
 const laughGifs = [
     "https://i.imgur.com/eM5wmZR.gif",
     "https://i.imgur.com/7ROsikQ.gif",
@@ -11,7 +10,7 @@ const laughGifs = [
     "https://i.imgur.com/3jvGgcF.gif"
 ];
 
-const laughEmoji = "<a:laugh:1339326799246655599>"; // Hier das passende Emoji einfügen
+const laughEmoji = "<a:laugh:1339326799246655599>";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -35,7 +34,6 @@ module.exports = {
         ),
 
     async execute(interaction) {
-        // Wähle zufällig ein GIF aus der Liste aus
         const randomIndex = Math.floor(Math.random() * laughGifs.length);
         const laughGif = laughGifs[randomIndex];
 

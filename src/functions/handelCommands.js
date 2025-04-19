@@ -7,7 +7,7 @@ const clientId = '1338942707841892492';
 const guildId = 'YOUR GUILD ID';
 
 module.exports = (client) => {
-    client.commands = new Collection(); // Sicherstellen, dass die Collection existiert
+    client.commands = new Collection();
 
     client.handleCommands = async (commandFolders, path) => {
         client.commandArray = [];
