@@ -8,7 +8,8 @@ const stareGifs = [
     "https://i.imgur.com/XHKEeU1.gif",
     "https://i.imgur.com/DhXokcO.gif",
     "https://i.imgur.com/BJfnvGo.gif",
-    "https://i.imgur.com/RLLb2PI.gif"
+    "https://i.imgur.com/RLLb2PI.gif",
+    "https://i.imgur.com/Xve30y4.gif"
 ];
 
 const stareEmoji = "<:stare:1340031606848622612>";
