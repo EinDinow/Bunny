@@ -1,32 +1,17 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
-
-const kissGifs = [
-    "https://i.imgur.com/WWBbjG5.gif",
-    "https://i.imgur.com/YNtI9K2.gif",
-    "https://i.imgur.com/Gdiv5uG.gif",
-    "https://i.imgur.com/oEXAQiW.gif",
-    "https://i.imgur.com/hAwk8ln.gif"
-];
-
-const foreheadkissGifs = [
-    "https://i.imgur.com/b2xFrcs.gif",
-    "https://i.imgur.com/Gew3y7V.gif",
-    "https://i.imgur.com/aHYa05Z.gif",
-    "https://i.imgur.com/MZ5VUdA.gif",
-    "https://i.imgur.com/uHRvAEw.gif"
-]
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
 const kissEmoji = "<a:kiss:1339326778233323601>";
+const baseDir = '/home/discord/Bunny/src/gifs/kiss';
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('kiss')
         .setDescription('Küsse irgendjemanden, oder jemand bestimmtes')
-        .setIntegrationTypes([0,1])
-        .setContexts([0,1,2])
-        .addStringOption(option => 
+        .setIntegrationTypes([0, 1])
+        .setContexts([0, 1, 2])
+        .addStringOption(option =>
             option.setName('typ')
                 .setDescription('Mouth z.B. Küsst auf den Mund, Forehead z.B. Stirn/Wange')
                 .setRequired(true)
@@ -35,57 +20,47 @@ module.exports = {
                     { name: 'Forehead', value: 'forehead' }
                 )
         )
-        .addUserOption(option => 
+        .addUserOption(option =>
             option.setName('user')
                 .setDescription('Die Person, die du küssen möchtest.')
                 .setRequired(false)
         ),
 
     async execute(interaction) {
-        const randomIndexkissGifs = Math.floor(Math.random() * kissGifs.length);
-        const kissGif = kissGifs[randomIndexkissGifs];
-
-        const randomIndexforeheadkissGifs = Math.floor(Math.random() * foreheadkissGifs.length);
-        const foreheadkissGif = foreheadkissGifs[randomIndexforeheadkissGifs];
-
         const typ = interaction.options.getString('typ');
         const user = interaction.options.getUser('user');
+        const gifFolder = `${baseDir}/${typ}`;
 
-        let description = "";
-        let gifAuswahl = "";
+        const result = getRandomGifAttachment(gifFolder);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Kuss-GIFs gefunden!', ephemeral: true });
+        }
+
+        let description;
 
         if (!user) {
-            description = typ === "mouth" 
-                ? `${interaction.user} ist am küssen. ${kissEmoji}` 
-                : `${interaction.user} ist am küssen. ${kissEmoji}`;
+            description = `${interaction.user} ist am küssen. ${kissEmoji}`;
         } else if (user.id === interaction.user.id) {
-            await interaction.reply({
+            return interaction.reply({
                 embeds: [{
-                    description: "Um zu lachen, lasse das Argument (User) weg!",
+                    description: "Um zu küssen, lasse das Argument (User) weg!",
                     color: 0xFF0000
                 }],
                 ephemeral: true
             });
-            return;
         } else {
-            description = typ === "mouth" 
-                ? `${user} du wirst von ${interaction.user} geküsst. ${kissEmoji}` 
-                : `${user} du wirst von ${interaction.user} geküsst. ${kissEmoji}`;
+            description = `${user} du wirst von ${interaction.user} geküsst. ${kissEmoji}`;
         }
-
-        gifAuswahl = typ === "mouth"
-                ? kissGif
-                : foreheadkissGif;
 
         const embed = new EmbedBuilder()
             .setDescription(description)
             .setColor(0x800080)
-            .setImage(gifAuswahl)
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ 
-            content: user ? `${user}` : undefined, 
-            embeds: [embed] 
+        await interaction.reply({
+            content: user ? `${user}` : undefined,
+            embeds: [embed],
+            files: [result.attachment]
         });
-            
     }
 };

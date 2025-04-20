@@ -1,15 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
-const desperateGifs = [
-"https://i.imgur.com/Fer2KTx.gif",
-"https://i.imgur.com/EKLPjbc.gif",
-"https://i.imgur.com/XUmVkEb.gif",
-"https://i.imgur.com/iOBgwNF.gif",
-"https://i.imgur.com/I96r9tp.gif"
-];
-
+const desperateGifDir = '/home/discord/Bunny/src/gifs/desperate';
 const desperateEmoji = "<:desperate:1345463280214478958>";
 
 module.exports = {
@@ -20,14 +13,16 @@ module.exports = {
         .setContexts([0, 1, 2]),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * desperateGifs.length);
-        const desperateGif = desperateGifs[randomIndex];
+        const result = getRandomGifAttachment(desperateGifDir);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Desperate-GIFs gefunden!', ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
             .setDescription(`${interaction.user} ist verzweifelt. ${desperateEmoji}`)
-            .setColor(0x800080)
-            .setImage(desperateGif);
+            .setColor('Purple')
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], files: [result.attachment] });
     }
 };

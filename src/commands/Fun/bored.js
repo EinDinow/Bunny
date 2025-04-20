@@ -1,15 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
-const boredGifs = [
-    "https://i.imgur.com/lkLGeoU.gif",
-    "https://i.imgur.com/wOpCJyj.gif",
-    "https://i.imgur.com/DAfOHjq.gif",
-    "https://i.imgur.com/RJIe1HE.gif",
-    "https://i.imgur.com/LIyk0Uj.gif"
-];
-
+const boredGifDir = '/home/discord/Bunny/src/gifs/bored';
 const boredEmoji = "<a:bored:1340049895939113063>";
 
 module.exports = {
@@ -20,14 +13,16 @@ module.exports = {
         .setContexts([0, 1, 2]),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * boredGifs.length);
-        const boredGif = boredGifs[randomIndex];
+        const result = getRandomGifAttachment(boredGifDir);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Bored-GIFs gefunden!', ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
             .setDescription(`${interaction.user} ist gelangweilt ${boredEmoji}`)
-            .setColor(0x800080)
-            .setImage(boredGif);
+            .setColor('Purple')
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], files: [result.attachment] });
     }
 };

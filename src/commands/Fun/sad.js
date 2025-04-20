@@ -1,16 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
-
-const sadGifs = [
-    "https://i.imgur.com/698DyZp.gif",
-    "https://i.imgur.com/AcFSdS0.gif",
-    "https://i.imgur.com/1nHEn1u.gif",
-    "https://i.imgur.com/1ZLMMbU.gif",
-    "https://i.imgur.com/7EthHex.gif"
-];
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
 const sadEmoji = "<:cry:1339326711354888253>";
+const gifFolder = '/home/discord/Bunny/src/gifs/cry';
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -20,14 +13,19 @@ module.exports = {
         .setContexts([0, 1, 2]),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * sadGifs.length);
-        const sadGif = sadGifs[randomIndex];
+        const result = getRandomGifAttachment(gifFolder);
+        if (!result) {
+            return interaction.reply({ content: 'Keine traurigen GIFs gefunden!', ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
             .setDescription(`${interaction.user} ist traurig. ${sadEmoji}`)
             .setColor(0x800080)
-            .setImage(sadGif);
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({
+            embeds: [embed],
+            files: [result.attachment]
+        });
     }
 };

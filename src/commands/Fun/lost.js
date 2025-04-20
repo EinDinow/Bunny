@@ -1,16 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
-
-const lostGifs = [
-"https://i.imgur.com/QZ34aRv.gif",
-"https://i.imgur.com/r43RyqC.gif",
-"https://i.imgur.com/QnfP5h0.gif",
-"https://i.imgur.com/8f3uTpQ.gif",
-"https://i.imgur.com/BNM7s8Z.gif"
-];
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
 const lostEmoji = "<:lost:1340046179685367868>";
+const gifFolder = '/home/discord/Bunny/src/gifs/lost';
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,42 +11,48 @@ module.exports = {
         .setDescription('Zeige den Leuten wie lost du bist')
         .setIntegrationTypes([0, 1])
         .setContexts([0, 1, 2])
-        .addUserOption(option => 
+        .addUserOption(option =>
             option.setName('user')
-                .setDescription('Die Person, die du beißen möchtest.')
+                .setDescription('Die Person, die du als lost bezeichnen willst.')
                 .setRequired(false)
         ),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * lostGifs.length);
-        const lostGif = lostGifs[randomIndex];
+        const result = getRandomGifAttachment(gifFolder);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Lost-GIFs gefunden!', ephemeral: true });
+        }
 
         const user = interaction.options.getUser('user');
 
+        let description;
         if (!user) {
-            const embed = {
-                description: `${interaction.user} ist lost. ${lostEmoji}`,
-                color: 0x800080,
-                image: { url: lostGif }
-            };
-            await interaction.reply({ embeds: [embed] });
+            description = `${interaction.user} ist lost. ${lostEmoji}`;
         } else if (user.id === interaction.user.id) {
-            const embed = {
-                description: "Um zu zeigen wie lost du bist, lasse das Argument (User) weg!",
-                color: 0xFF0000
-            };
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({
+                embeds: [{
+                    description: "Um zu zeigen wie lost du bist, lasse das Argument (User) weg!",
+                    color: 0xFF0000
+                }],
+                ephemeral: true
+            });
         } else {
-            const embed = {
-                description: `${user} ist lost. ${lostEmoji}`,
-                color: 0x800080,
-                image: { url: lostGif },
-                footer: {
-                    text: `Command ausgeführt von ${interaction.user.displayName}`,
-                    icon_url: interaction.user.displayAvatarURL(),
-                }
-            };
-            await interaction.reply({ content: `${user}`, embeds: [embed] });
+            description = `${user} ist lost. ${lostEmoji}`;
         }
+
+        const embed = new EmbedBuilder()
+            .setDescription(description)
+            .setColor(0x800080)
+            .setImage(`attachment://${result.fileName}`)
+            .setFooter({
+                text: `Command ausgeführt von ${interaction.user.displayName}`,
+                iconURL: interaction.user.displayAvatarURL()
+            });
+
+        await interaction.reply({
+            content: user ? `${user}` : undefined,
+            embeds: [embed],
+            files: [result.attachment]
+        });
     }
 };

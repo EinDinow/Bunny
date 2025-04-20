@@ -1,15 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
-const hungryGifs = [
-    "https://i.imgur.com/Y0kiijg.gif",
-    "https://i.imgur.com/eEXKCQy.gif",
-    "https://i.imgur.com/frQd8WV.gif",
-    "https://i.imgur.com/17S0Kx3.gif",
-    "https://i.imgur.com/qfkQ0iC.gif"
-];
-
+const hungryGifDir = '/home/discord/Bunny/src/gifs/hungry';
 const hungryEmoji = "<:hungry:1363164268639424633>";
 
 module.exports = {
@@ -20,14 +13,16 @@ module.exports = {
         .setContexts([0, 1, 2]),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * hungryGifs.length);
-        const hungryGif = hungryGifs[randomIndex];
+        const result = getRandomGifAttachment(hungryGifDir);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Hungry-GIFs gefunden!', ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
             .setDescription(`${interaction.user} ist hungrig. ${hungryEmoji}`)
             .setColor('Purple')
-            .setImage(hungryGif);
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], files: [result.attachment] });
     }
 };

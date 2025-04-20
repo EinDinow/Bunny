@@ -1,55 +1,54 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
-
-const slapGifs = [
-    "https://i.imgur.com/TaUdUvq.gif",
-    "https://i.imgur.com/DzH9n70.gif",
-    "https://i.imgur.com/qqLtEVl.gif",
-    "https://i.imgur.com/xm6mMYx.gif",
-    "https://i.imgur.com/pJRmjmR.gif"
-];
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
 const slapEmoji = "<:slap:1339326910962073612>";
+const gifFolder = '/home/discord/Bunny/src/gifs/slap';
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('slap')
-        .setDescription('Du kannst generell oder jemanden bestimmtes streicheln.')
-        .setIntegrationTypes([0,1])
-        .setContexts([0,1,2])
-        .addUserOption(option => 
+        .setDescription('Du kannst generell oder jemanden bestimmtes schlagen.')
+        .setIntegrationTypes([0, 1])
+        .setContexts([0, 1, 2])
+        .addUserOption(option =>
             option.setName('user')
-                .setDescription('Die Person, die du beißen möchtest.')
+                .setDescription('Die Person, die du schlagen möchtest.')
                 .setRequired(false)
         ),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * slapGifs.length);
-        const slapGif = slapGifs[randomIndex];
+        const result = getRandomGifAttachment(gifFolder);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Slap-GIFs gefunden!', ephemeral: true });
+        }
 
         const user = interaction.options.getUser('user');
+        let description;
 
         if (!user) {
-            const embed = {
-                description: `${interaction.user} ist am schlagen. ${slapEmoji}`,
-                color: 0x800080,
-                image: { url: slapGif }
-            };
-            await interaction.reply({ embeds: [embed] });
+            description = `${interaction.user} ist am schlagen. ${slapEmoji}`;
         } else if (user.id === interaction.user.id) {
-            const embed = {
-                description: "Um zu schlagen, lasse das Argument (User) weg!",
-                color: 0xFF0000
-            };
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({
+                embeds: [{
+                    description: "Um zu schlagen, lasse das Argument (User) weg!",
+                    color: 0xFF0000
+                }],
+                ephemeral: true
+            });
         } else {
-            const embed = {
-                description: `${user} du wirst von ${interaction.user} geschlagen. ${slapEmoji}`,
-                color: 0x800080,
-                image: { url: slapGif }
-            };
-            await interaction.reply({ content: `${user}`, embeds: [embed] });
+            description = `${user} du wirst von ${interaction.user} geschlagen. ${slapEmoji}`;
         }
+
+        const embed = new EmbedBuilder()
+            .setDescription(description)
+            .setColor('Purple')
+            .setImage(`attachment://${result.fileName}`);
+
+        await interaction.reply({
+            content: user ? `${user}` : undefined,
+            embeds: [embed],
+            files: [result.attachment]
+        });
     }
 };

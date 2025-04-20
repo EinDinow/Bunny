@@ -1,55 +1,54 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
-const stareGifs = [
-    "https://i.imgur.com/ikOiBbi.gif",
-    "https://i.imgur.com/XHKEeU1.gif",
-    "https://i.imgur.com/DhXokcO.gif",
-    "https://i.imgur.com/BJfnvGo.gif",
-    "https://i.imgur.com/RLLb2PI.gif"
-];
-
+const stareGifDir = '/home/discord/Bunny/src/gifs/stare';
 const stareEmoji = "<:stare:1340031606848622612>";
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stare')
         .setDescription('Du kannst generell oder jemanden bestimmtes anstarren.')
-        .setIntegrationTypes([0,1])
-        .setContexts([0,1,2])
+        .setIntegrationTypes([0, 1])
+        .setContexts([0, 1, 2])
         .addUserOption(option => 
             option.setName('user')
-                .setDescription('Die Person, die du beißen möchtest.')
+                .setDescription('Die Person, die du anstarren möchtest.')
                 .setRequired(false)
         ),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * stareGifs.length);
-        const stareGif = stareGifs[randomIndex];
+        const result = getRandomGifAttachment(stareGifDir);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Stare‑GIFs gefunden!', ephemeral: true });
+        }
 
         const user = interaction.options.getUser('user');
+        let description;
 
         if (!user) {
-            const embed = {
-                description: `${interaction.user} ist am starren ${stareEmoji}`,
-                color: 0x800080,
-                image: { url: stareGif }
-            };
-            await interaction.reply({ embeds: [embed] });
+            description = `${interaction.user} ist am starren ${stareEmoji}`;
         } else if (user.id === interaction.user.id) {
-            const embed = {
-                description: "Um zu starren, lasse das Argument (User) weg!",
-                color: 0xFF0000
-            };
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({
+                embeds: [{
+                    description: "Um zu starren, lasse das Argument (User) weg!",
+                    color: 0xFF0000
+                }],
+                ephemeral: true
+            });
         } else {
-            const embed = {
-                description: `${user} du wirst von ${interaction.user} angestarrt. ${stareEmoji}`,
-                color: 0x800080,
-                image: { url: stareGif }
-            };
-            await interaction.reply({ content: `${user}`, embeds: [embed] });
+            description = `${user} du wirst von ${interaction.user} angestarrt. ${stareEmoji}`;
         }
+
+        const embed = new EmbedBuilder()
+            .setDescription(description)
+            .setColor(0x800080)
+            .setImage(`attachment://${result.fileName}`);
+
+        await interaction.reply({
+            content: user ? `${user}` : undefined,
+            embeds: [embed],
+            files: [result.attachment]
+        });
     }
 };

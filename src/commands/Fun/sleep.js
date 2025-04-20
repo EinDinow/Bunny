@@ -1,15 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
-const sleepGifs = [
-    "https://i.imgur.com/7D29JJ8.gif",
-    "https://i.imgur.com/l8y17aA.gif",
-    "https://i.imgur.com/kjKVCyk.gif",
-    "https://i.imgur.com/omHvavY.gif",
-    "https://i.imgur.com/3ol4sNX.gif"
-];
-
+const sleepGifDir = '/home/discord/Bunny/src/gifs/sleep';
 const sleepEmoji = "<a:sleep:1339712344129011755>";
 
 module.exports = {
@@ -20,14 +13,16 @@ module.exports = {
         .setContexts([0, 1, 2]),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * sleepGifs.length);
-        const sleepGif = sleepGifs[randomIndex];
+        const result = getRandomGifAttachment(sleepGifDir);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Sleep‑GIFs gefunden!', ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
             .setDescription(`${interaction.user} ist am schlafen. ${sleepEmoji}`)
             .setColor(0x800080)
-            .setImage(sleepGif);
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], files: [result.attachment] });
     }
 };

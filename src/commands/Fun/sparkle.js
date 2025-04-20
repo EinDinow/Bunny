@@ -1,15 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
-const random = require('random');
+const getRandomGifAttachment = require('../../events/getRandomGifAttachment');
 
-const sparkleGifs = [
-"https://i.imgur.com/2Vdi1Pt.gif",
-"https://i.imgur.com/ug2QFit.gif",
-"https://i.imgur.com/PNzq8VA.gif",
-"https://i.imgur.com/5X65m2M.gif",
-"https://i.imgur.com/e8yBPFd.gif"
-];
-
+const sparkleGifDir = '/home/discord/Bunny/src/gifs/sparkle';
 const sparkleEmoji = "<a:sparkle:1342918035211812894>";
 
 module.exports = {
@@ -20,14 +13,16 @@ module.exports = {
         .setContexts([0, 1, 2]),
 
     async execute(interaction) {
-        const randomIndex = Math.floor(Math.random() * sparkleGifs.length);
-        const sparkleGif = sparkleGifs[randomIndex];
+        const result = getRandomGifAttachment(sparkleGifDir);
+        if (!result) {
+            return interaction.reply({ content: 'Keine Sparkle‑GIFs gefunden!', ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
             .setDescription(`${interaction.user} ist am funkeln. ${sparkleEmoji}`)
             .setColor(0x800080)
-            .setImage(sparkleGif);
+            .setImage(`attachment://${result.fileName}`);
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], files: [result.attachment] });
     }
 };
