@@ -4,7 +4,7 @@ const { SlashCommandBuilder, ContextMenuCommandBuilder, Collection } = require("
 const fs = require('fs');
 
 const clientId = '1338942707841892492';
-const guildId = 'YOUR GUILD ID'; // optional für Guild-spezifische Registrierung
+const guildId = 'YOUR GUILD ID';
 
 module.exports = (client) => {
     client.commands = new Collection();
@@ -23,7 +23,6 @@ module.exports = (client) => {
                     continue;
                 }
 
-                // ⬇️ Handling für einzelne oder mehrere Command-Daten (z. B. Slash + Context)
                 if (Array.isArray(command.data)) {
                     command.data.forEach(cmd => {
                         client.commands.set(cmd.name, command);
@@ -42,7 +41,7 @@ module.exports = (client) => {
             console.log('⏳ Registriere (/) und Context Menu Commands...');
 
             await rest.put(
-                Routes.applicationCommands(clientId), // Oder applicationGuildCommands(clientId, guildId)
+                Routes.applicationCommands(clientId),
                 { body: client.commandArray }
             );
 
