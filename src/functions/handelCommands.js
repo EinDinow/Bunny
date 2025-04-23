@@ -1,10 +1,10 @@
 const { REST } = require("@discordjs/rest");
 const { Routes } = require('discord-api-types/v9');
-const { SlashCommandBuilder, Collection } = require("discord.js");
+const { SlashCommandBuilder, ContextMenuCommandBuilder, Collection } = require("discord.js");
 const fs = require('fs');
 
-const clientId = '1338942707841892492'; 
-const guildId = 'YOUR GUILD ID';
+const clientId = '1338942707841892492';
+const guildId = 'YOUR GUILD ID'; // optional für Guild-spezifische Registrierung
 
 module.exports = (client) => {
     client.commands = new Collection();
@@ -14,39 +14,52 @@ module.exports = (client) => {
 
         for (const folder of commandFolders) {
             const commandFiles = fs.readdirSync(`${path}/${folder}`).filter(file => file.endsWith('.js'));
+
             for (const file of commandFiles) {
                 const command = require(`../commands/${folder}/${file}`);
-                client.commands.set(command.data.name, command);
-                
-                client.commandArray.push(
-                    command.data instanceof SlashCommandBuilder ? command.data.toJSON() : command.data
-                );
+
+                if (!command.data || !command.execute) {
+                    console.warn(`[WARN] Die Datei ${file} im Ordner ${folder} hat kein data oder execute!`);
+                    continue;
+                }
+
+                // ⬇️ Handling für einzelne oder mehrere Command-Daten (z. B. Slash + Context)
+                if (Array.isArray(command.data)) {
+                    command.data.forEach(cmd => {
+                        client.commands.set(cmd.name, command);
+                        client.commandArray.push(cmd.toJSON());
+                    });
+                } else {
+                    client.commands.set(command.data.name, command);
+                    client.commandArray.push(command.data.toJSON());
+                }
             }
         }
 
         const rest = new REST({ version: '9' }).setToken(process.env.token);
 
         try {
-            console.log('Started refreshing application (/) commands.');
+            console.log('⏳ Registriere (/) und Context Menu Commands...');
 
             await rest.put(
-                Routes.applicationCommands(clientId), { body: client.commandArray }
+                Routes.applicationCommands(clientId), // Oder applicationGuildCommands(clientId, guildId)
+                { body: client.commandArray }
             );
 
-            console.log('Successfully reloaded application (/) commands.');
+            console.log('✅ Erfolgreich registriert!');
         } catch (error) {
-            console.error('Error reloading commands:', error);
+            console.error('❌ Fehler beim Registrieren:', error);
         }
     };
 
     client.once('ready', () => {
-        console.log(`Logged in as ${client.user.tag}`);
+        console.log(`🟢 Eingeloggt als ${client.user.tag}`);
 
         client.user.setPresence({
             activities: [{ name: 'Ein RP Bot!', type: 4 }],
             status: 'online'
         });
 
-        console.log('Presence set successfully.');
+        console.log('🟢 Präsenz gesetzt.');
     });
 };
