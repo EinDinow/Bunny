@@ -1,7 +1,5 @@
 const statusArray = [
-    { content: "Mit Abenteuern beschäftigt", type: 0, status: 'online' },
-    { content: "RP Geschichten lesen", type: 3, status: 'idle' },
-    { content: "Slash Commands beobachten", type: 4, status: 'dnd' },
+    { content: "Ein RolePlay Bot!", type: 4, status: 'Online' }
 ];
 
 module.exports = {
