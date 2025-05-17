@@ -35,7 +35,7 @@ module.exports = {
         if (levels[userId].xp >= neededXP) {
             levels[userId].xp -= neededXP;
             levels[userId].level++;
-            message.channel.send(`🎉 \`${message.author}\`, du bist jetzt Level \`${levels[userId].level}\`!`);
+            message.channel.send(`🎉 \`${message.username}\`, du bist jetzt Level \`${levels[userId].level}\`!`);
         }
 
         saveLevels();
