@@ -41,7 +41,12 @@ module.exports = {
             }
 
             const sorted = filtered
-                .sort(([, a], [, b]) => b.level - a.level)
+                .sort(([, a], [, b]) => {
+                    if (b.level === a.level) {
+                        return b.xp - a.xp;
+                    }
+                    return b.level - a.level;
+                })
                 .slice(0, 10);
 
             const embed = new EmbedBuilder()
